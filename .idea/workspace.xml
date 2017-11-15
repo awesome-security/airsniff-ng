@@ -31,6 +31,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c921f1c9-01cf-42b5-8ddf-dcc5081b1bb3" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main.cpp" afterPath="$PROJECT_DIR$/src/main.cpp" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -46,11 +47,11 @@
       <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="330" column="21" lean-forward="false" selection-start-line="330" selection-start-column="21" selection-end-line="330" selection-end-column="21" />
+            <state relative-caret-position="234">
+              <caret line="652" column="0" lean-forward="true" selection-start-line="652" selection-start-column="0" selection-end-line="652" selection-end-column="0" />
               <folding>
-                <marker date="1510774151342" expanded="true" signature="25170:27869" ph="{...}" />
-                <marker date="1510774151342" expanded="true" signature="27882:27922" ph="{...}" />
+                <marker date="1510774326660" expanded="true" signature="25079:27877" ph="{...}" />
+                <marker date="1510774326660" expanded="true" signature="27890:27930" ph="{...}" />
               </folding>
             </state>
           </provider>
@@ -229,7 +230,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1510769757137</updated>
-      <workItem from="1510769758428" duration="3981000" />
+      <workItem from="1510769758428" duration="4178000" />
     </task>
     <task id="LOCAL-00001" summary="Add dns_spoofing">
       <created>1510773904516</created>
@@ -242,7 +243,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3981000" />
+    <option name="totallyTimeSpent" value="4178000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1680" height="1023" extended-state="6" />
@@ -397,11 +398,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="330" column="21" lean-forward="false" selection-start-line="330" selection-start-column="21" selection-end-line="330" selection-end-column="21" />
+        <state relative-caret-position="234">
+          <caret line="652" column="0" lean-forward="true" selection-start-line="652" selection-start-column="0" selection-end-line="652" selection-end-column="0" />
           <folding>
-            <marker date="1510774151342" expanded="true" signature="25170:27869" ph="{...}" />
-            <marker date="1510774151342" expanded="true" signature="27882:27922" ph="{...}" />
+            <marker date="1510774326660" expanded="true" signature="25079:27877" ph="{...}" />
+            <marker date="1510774326660" expanded="true" signature="27890:27930" ph="{...}" />
           </folding>
         </state>
       </provider>

