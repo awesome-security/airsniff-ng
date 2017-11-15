@@ -18,6 +18,7 @@ make
 
 ## Features
 * ARP Spoofer
+* DNS Spoof
 * Speedport password generator
 * Command completion with tab
 * History for fast completion
@@ -26,14 +27,25 @@ make
 ### Install
 The installation is very simple use your favorite package manager e.g. apt or apt-get and install all required packages before running the curl script.
 
+#### Packages
+* Libcraft
+* Pcap lib
+* Boost
+* g++
+* make
 #### On debian
 ```
-sudo apt-get install g++ gcc boost
+sudo apt-get install g++ gcc boost make
 ```
 
 #### On arch
 ```
-sudo pacman -S g++ gcc boost
+sudo pacman -S g++ gcc boost make
+```
+
+#### Additional
+```
+yaourt libcraft
 ```
 
 ### Tutorials
@@ -44,7 +56,7 @@ Arp spoofing is even simpler with airsniff-ng. You can use the arp_poison module
 set_gateway_ip [gateway-ip]
 set_target_ip [target-ip]
 set_interface [interface]
-arp_poison 
+arp_poison
 ```
 
 ##### Screenshots
@@ -59,7 +71,7 @@ To use this module use following commands:
 ```
 set_ssid "WLAN-9A3907"
 set_bssid "00:12:BF:9A:39:41"
-gen_speedport_w500 
+gen_speedport_w500
 ```
 
 ##### Screenshots
@@ -104,7 +116,7 @@ All other commands get intepreted as normal bash commands,so that you don't have
 `set_target_ip [string]` - Set a custom target ip for arp-poisoning <br>
 `set_target_gateway [string]` - Set the gateway ip for arp-poisoning <br>
 `set_interface [string]` - Set a custom interface, default none <br>
-#### Show 
+#### Show
 `show_modules` - Print all modules <br>
 `show_help` - Print the help and man manual <br>
 `show_settings` - Print all settings given by the user <br>
@@ -120,7 +132,7 @@ All other commands get intepreted as normal bash commands,so that you don't have
 We try always to improve your projects. If you want to constibute create a pull request.
 <br>
 <br>
- [![](https://img.shields.io/badge/Workflow-gitflow--branching--model-81A1C1.svg?style=flat-square)](http://nvie.com/posts/a-successful-git-branching-model) 
+ [![](https://img.shields.io/badge/Workflow-gitflow--branching--model-81A1C1.svg?style=flat-square)](http://nvie.com/posts/a-successful-git-branching-model)
 
 ### Credits
 I modified the webserver based on the [komancs](https://github.com/akoskovacs/komancs) webserver.
