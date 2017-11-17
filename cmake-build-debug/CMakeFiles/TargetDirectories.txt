@@ -1,3 +1,0 @@
-/home/deltax/airsniff-ng/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/deltax/airsniff-ng/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/deltax/airsniff-ng/cmake-build-debug/CMakeFiles/airsniff_ng.dir
